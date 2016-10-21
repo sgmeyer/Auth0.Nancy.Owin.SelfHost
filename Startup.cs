@@ -1,5 +1,6 @@
 ﻿using Owin;
 using Microsoft.Owin.Security.Jwt;
+using System.Configuration;
 using System.Text;
 using System.IdentityModel.Tokens;
 
@@ -14,16 +15,15 @@ namespace Auth0.Nancy.Owin.SelfHost
             // compatibility we will allow the API to accept JWTs from both audiences.
 
             // The Client_ID is used as the audience for the id_token.
-            var clientAudience = "Client Id used to authenticate the users";
+            var clientAudience = ConfigurationManager.AppSettings["auth0:ClientId"];
 
             // With the pipeline-2 flow we'll use the identifier of the API as the audience.
             var apiAudience = "https://sgmeyer.nancy.owin.selfhost.com/";
 
             // This demo uses HS256 symmetric signing.  It is always better to use RS256 assymmetric
-            // signing with a certificate.  Also, for this example I am not Base64 encoding the scret.
-            // If you are using jwt.io's debugger make sure you uncheck that box or alter this line of
-            // code.
-            var keyAsBytes = Encoding.ASCII.GetBytes("signing secret");
+            // signing with a certificat.
+            var secret = ConfigurationManager.AppSettings["auth0:ClientSecret"];
+            var keyAsBytes = Encoding.ASCII.GetBytes(secret);
             var options = new JwtBearerAuthenticationOptions()
             {
                 TokenValidationParameters = new TokenValidationParameters
@@ -34,9 +34,6 @@ namespace Auth0.Nancy.Owin.SelfHost
                     // This is critical.  You always want to require a signed token.  Never
                     // accept a token that is not signed.
                     RequireSignedTokens = true,
-
-                    // These are other validation options you could explicitly set as true.  Most default
-                    // to true.
                     //RequireExpirationTime = true,
                     //ValidateAudience = true
                     //ValidateIssuer = true

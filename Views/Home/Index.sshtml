@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+      <title>Auth0 - Nancy JWT and Lock Demo</title>
+    </head>
+    <body>
+        <span>Welcome! Please <button onclick="lock.show();">Login</button>.</span>
+        
+      <script src="https://cdn.auth0.com/js/lock/10.4/lock.min.js"></script>
+    <script>
+      var lock = new Auth0Lock('ZxbatHjRgBj9xFZ1SyygKZDhkb4r17Vk', 'sgmeyer.auth0.com', {
+        auth: {
+          redirectUrl: 'http://localhost:8080/callback',
+          responseType: 'code',
+          params: {
+            scope: 'openid email, nickname, picture, user_id',
+			state: getParameterValue('return')
+          }
+        }
+      });
+
+	  // When a user attempts to access a protected view without authenticating the user will be
+	  // redirected back to login with a GET parameter containing the URL encoded path to the
+	  // view they attempted to view.  This method is used to extract the path from the URL query.
+	  // Ultimately we are using the Authentication Parameter `state` to keep this state during
+	  // Authentication.  You can also add a nonce to the `state` parameter to help mitigate XSRF.
+	  //
+	  // https://auth0.com/docs/libraries/lock/v10/sending-authentication-parameters
+	  // https://auth0.com/docs/protocols/oauth-state
+	  //
+	  // This is a nice utlity method @ChrisFedinandi (http://twitter.com/ChrisFerdinandi) wrote.  
+	  // https://gomakethings.com/how-to-get-the-value-of-a-querystring-with-native-javascript/
+	  function getParameterValue(paramName) {
+		var href = window.location.href;
+		var regx = new RegExp( '[?&]' + paramName + '=([^&#]*)', 'i' );
+		var params = regx.exec(href);
+		
+		return params ? params[1] : null
+	  }
+
+      </script>
+    </body>
+</html>
+
+
+// https://auth0.com/docs/protocols/oauth-state

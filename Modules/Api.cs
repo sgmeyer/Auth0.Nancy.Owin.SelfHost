@@ -3,11 +3,18 @@ using Nancy.Security;
 
 namespace Auth0.Nancy.Owin.SelfHost.Modules
 {
-    public class Index : NancyModule
+    /**
+     * I highly recommend keeping the API and Website as two different applications (and clients).
+     * You will find this is more beneficial as we make our new Auth Pipeline changes in the roadmap.
+     **/
+    public class Api : NancyModule
     {
-        public Index()
+        public Api()
         {
-            Get["/"] = _ => "Hello!";
+#if !DEBUG
+            this.RequiresHttps();
+#endif
+            Get["/api/"] = _ => "Hello!";
         }
     }
 
@@ -20,7 +27,7 @@ namespace Auth0.Nancy.Owin.SelfHost.Modules
 #endif
             this.RequiresMSOwinAuthentication();
 
-            Get["/private"] = _ => {
+            Get["/api/private"] = _ => {
                 var user = this.Context.GetMSOwinUser();
                 return "Hello, from secured.";
             };
