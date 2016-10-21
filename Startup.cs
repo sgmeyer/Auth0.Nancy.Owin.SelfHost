@@ -23,7 +23,7 @@ namespace Auth0.Nancy.Owin.SelfHost
             // This demo uses HS256 symmetric signing.  It is always better to use RS256 assymmetric
             // signing with a certificat.
             var secret = ConfigurationManager.AppSettings["auth0:ClientSecret"];
-            var keyAsBytes = Encoding.ASCII.GetBytes(secret);
+            var keyAsBytes = Base64UrlDecode(secret);
             var options = new JwtBearerAuthenticationOptions()
             {
                 TokenValidationParameters = new TokenValidationParameters
@@ -50,5 +50,28 @@ namespace Auth0.Nancy.Owin.SelfHost
             app.UseJwtBearerAuthentication(options);
             app.UseNancy();
         }
+
+
+        // We are using id_token coming out of Auth0.  This is signed with the ClientSecret.
+        // We need this helper method for verifying the JWT signature:
+        //
+        // https://auth0.com/docs/tutorials/generate-jwt-dotnet
+        private byte[] Base64UrlDecode(string arg)
+        {
+            string s = arg;
+            s = s.Replace('-', '+'); // 62nd char of encoding
+            s = s.Replace('_', '/'); // 63rd char of encoding
+            switch (s.Length % 4) // Pad with trailing '='s
+            {
+                case 0: break; // No pad chars in this case
+                case 2: s += "=="; break; // Two pad chars
+                case 3: s += "="; break; // One pad char
+                default:
+                    throw new System.Exception(
+                "Illegal base64url string!");
+            }
+            return System.Convert.FromBase64String(s); // Standard base64 decoder
+        }
+
     }
 }
